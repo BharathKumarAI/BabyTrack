@@ -24,7 +24,7 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(({
   const pathname = usePathname();
 
   return (
-    <>
+    
       <nav
         className={cn(
           "fixed inset-x-0 bottom-0 bg-secondary border-t z-50",
@@ -35,27 +35,27 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(({
       >
         <div className="container max-w-full flex items-center justify-around p-3">
           {navigationItems.map((item) => (
-            
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex flex-col items-center justify-center px-3 py-2 rounded-md hover:bg-accent transition-colors",
-                  {
-                    "text-accent-foreground": pathname === item.href,
-                  }
-                )}
-              >
-                {Icons[item.icon] ? <Icons[item.icon] className="h-5 w-5" /> : null}
-                <span className="text-xs">{item.label}</span>
-              </Link>
-            
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex flex-col items-center justify-center px-3 py-2 rounded-md hover:bg-accent transition-colors",
+                {
+                  "text-accent-foreground": pathname === item.href,
+                }
+              )}
+            >
+              {Icons[item.icon as keyof typeof Icons] ? <Icons[item.icon as keyof typeof Icons] className="h-5 w-5" /> : null}
+              <span className="text-xs">{item.label}</span>
+            </Link>
           ))}
         </div>
       </nav>
-    </>
+    
   );
 });
 Navbar.displayName = "Navbar";
 
 export { Navbar };
+
+
