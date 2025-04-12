@@ -45,7 +45,9 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(({
                 }
               )}
             >
-              {Icons[item.icon as keyof typeof Icons] ? <Icons[item.icon as keyof typeof Icons] className="h-5 w-5" /> : null}
+              {Icons[item.icon as keyof typeof Icons] ? (
+                <Icons[item.icon as keyof typeof Icons] className="h-5 w-5" />
+              ) : null}
               <span className="text-xs">{item.label}</span>
             </Link>
           ))}
@@ -58,4 +60,4 @@ Navbar.displayName = "Navbar";
 
 export { Navbar };
 
-
+    
