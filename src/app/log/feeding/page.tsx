@@ -15,7 +15,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {Calendar} from '@/components/ui/calendar';
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover';
 import {cn} from '@/lib/utils';
-import {CalendarIcon} from 'lucide-react';
+import {CalendarIcon, Trash2} from 'lucide-react';
 import {format} from 'date-fns';
 import {
   PieChart,
@@ -29,8 +29,10 @@ import {
   ComposedChart,
 } from 'recharts';
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger} from "@/components/ui/alert-dialog";
 
 interface FeedingLogEntry {
+  id: string;
   date: string;
   time: string;
   type: string;
@@ -52,6 +54,8 @@ const FeedingLogPage = () => {
   const [unit, setUnit] = useState('ml');
   const [notes, setNotes] = useState('');
   const [feedingLogs, setFeedingLogs] = useState<FeedingLogEntry[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
 
   useEffect(() => {
     // Load data from localStorage on component mount
@@ -66,6 +70,20 @@ const FeedingLogPage = () => {
     localStorage.setItem('feedingLogs', JSON.stringify(feedingLogs));
   }, [feedingLogs]);
 
+  const clearForm = () => {
+    setDate(new Date());
+    setTime(() => {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    });
+    setType('');
+    setAmount('');
+    setUnit('ml');
+    setNotes('');
+  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +92,7 @@ const FeedingLogPage = () => {
       return;
     }
     const newLog: FeedingLogEntry = {
+      id: Date.now().toString(), // Generate a unique ID
       date: date ? format(date, 'yyyy-MM-dd') : '',
       time,
       type,
@@ -82,10 +101,7 @@ const FeedingLogPage = () => {
       notes
     };
     setFeedingLogs([...feedingLogs, newLog]);
-    setTime('');
-    setType('');
-    setAmount('');
-    setNotes('');
+    clearForm(); // Clear the form after submitting
   };
 
   const chartData = feedingLogs.map(log => ({
@@ -94,6 +110,20 @@ const FeedingLogPage = () => {
   }));
 
   const hasData = feedingLogs.length > 0;
+
+  const handleDeleteConfirmation = (logId: string) => {
+    setSelectedLogId(logId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDelete = () => {
+    if (selectedLogId) {
+      const updatedLogs = feedingLogs.filter(log => log.id !== selectedLogId);
+      setFeedingLogs(updatedLogs);
+      setIsDeleteDialogOpen(false);
+      setSelectedLogId(null);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen pt-20">
@@ -127,10 +157,7 @@ const FeedingLogPage = () => {
                       mode="single"
                       selected={date}
                       onSelect={setDate}
-                      disabled={(date) => {
-                        const selectedYear = date?.getFullYear() || new Date().getFullYear();
-                        return selectedYear > new Date().getFullYear() + 1 || selectedYear < 2020;
-                      }}
+                      disabled={(date) => date > new Date()}
                       initialFocus
                     />
                   </PopoverContent>
@@ -148,7 +175,7 @@ const FeedingLogPage = () => {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="type">Type</Label>
-              <Select onValueChange={setType}>
+              <Select onValueChange={setType} value={type}>
                 <SelectTrigger className="w-[240px]">
                   <SelectValue placeholder="Select feeding type"/>
                 </SelectTrigger>
@@ -173,7 +200,7 @@ const FeedingLogPage = () => {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="unit">Unit</Label>
-                <Select onValueChange={setUnit}>
+                <Select onValueChange={setUnit} value={unit}>
                   <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Select unit"/>
                   </SelectTrigger>
@@ -229,23 +256,47 @@ const FeedingLogPage = () => {
                 <TableHead>Time</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Amount</TableHead>
+                <TableHead>Unit</TableHead>
                 <TableHead>Notes</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {hasData ? (
-                feedingLogs.map((log, index) => (
-                  <TableRow key={index}>
+                feedingLogs.map((log) => (
+                  <TableRow key={log.id}>
                     <TableCell>{log.date}</TableCell>
                     <TableCell>{log.time}</TableCell>
                     <TableCell>{log.type}</TableCell>
-                    <TableCell>{`${log.amount} ${log.unit}`}</TableCell>
+                    <TableCell>{log.amount}</TableCell>
+                    <TableCell>{log.unit}</TableCell>
                     <TableCell>{log.notes}</TableCell>
+                    <TableCell>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteConfirmation(log.id)}>
+                            <Trash2 className="h-4 w-4"/>
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete the feeding log.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">No data available</TableCell>
+                  <TableCell colSpan={7} className="text-center">No data available</TableCell>
                 </TableRow>
               )}
             </TableBody>
