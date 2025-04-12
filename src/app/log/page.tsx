@@ -1,3 +1,6 @@
+'use client';
+
+import React from "react"; // 👈 This is the important missing line!
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icons } from "@/components/icons";
@@ -16,26 +19,27 @@ const logModules = [
 
 export default function LogPage() {
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen pt-20">
-      <Card className="w-full max-w-md">
+    <div className="flex flex-col items-center justify-start min-h-screen pt-20 bg-pink-50">
+      <Card className="w-full max-w-md shadow-lg border-pink-200">
         <CardHeader>
-          <CardTitle className="text-2xl">Log Activity</CardTitle>
+          <CardTitle className="text-2xl text-pink-800">Log Activity</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          {logModules.map((module) => (
-            <Link
-              key={module.href}
-              href={module.href}
-              className="flex items-center justify-start px-4 py-2 rounded-md hover:bg-accent transition-colors"
-            >
-              {/* @ts-expect-error */}
-              <Icons[module.icon] className="h-5 w-5 mr-2" />
-              <span>{module.label}</span>
-            </Link>
-          ))}
+        <CardContent className="flex flex-col gap-3">
+          {logModules.map((module) => {
+            const Icon = Icons[module.icon as keyof typeof Icons];
+            return (
+              <Link
+                key={module.href}
+                href={module.href}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white hover:bg-pink-100 border border-pink-200 transition-all"
+              >
+                {Icon && <Icon className="h-5 w-5 text-pink-600" />}
+                <span className="text-pink-900 font-medium">{module.label}</span>
+              </Link>
+            );
+          })}
         </CardContent>
       </Card>
     </div>
   );
 }
-

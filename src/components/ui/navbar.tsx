@@ -1,13 +1,12 @@
 "use client";
 
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Icons } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
-import { usePathname } from 'next/navigation';
-import React from "react";
 
-interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
-}
+interface NavbarProps extends React.HTMLAttributes<HTMLElement> {}
 
 const navigationItems = [
   { href: "/", icon: "dashboard", label: "Dashboard" },
@@ -17,46 +16,41 @@ const navigationItems = [
   { href: "/settingsIcon", icon: "settingsIcon", label: "Settings" },
 ];
 
-const Navbar = React.forwardRef<HTMLElement, NavbarProps>(({
-  className,
-  ...props
-}, ref) => {
-  const pathname = usePathname();
+const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
+  ({ className, ...props }, ref) => {
+    const pathname = usePathname();
 
-  return (
-    <>
-      <nav
-        className={cn(
-          "fixed inset-x-0 bottom-0 bg-secondary border-t z-50",
-          className
-        )}
-        ref={ref}
-        {...props}
-      >
+    return (
+      
         <div className="container max-w-full flex items-center justify-around p-3">
-          {navigationItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex flex-col items-center justify-center px-3 py-2 rounded-md hover:bg-accent transition-colors",
-                {
-                  "text-accent-foreground": pathname === item.href,
-                }
-              )}
-            >
-              {Icons[item.icon as keyof typeof Icons] ? (
-                <Icons[item.icon as keyof typeof Icons] className="h-5 w-5" />
-              ) : null}
-              <span className="text-xs">{item.label}</span>
-            </Link>
-          ))}
+          {navigationItems.map((item) => {
+            const Icon = Icons[item.icon as keyof typeof Icons];
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center justify-center px-3 py-2 rounded-md hover:bg-accent transition-colors",
+                  {
+                    "text-accent-foreground": isActive,
+                  }
+                )}
+              >
+                {Icon && <Icon className={cn("h-5 w-5", {
+                    "text-accent-foreground": isActive,
+                  })
+                } />}
+                <span className="text-xs">{item.label}</span>
+              </Link>
+            );
+          })}
         </div>
-      </nav>
-    </>
-  );
-});
+      
+    );
+  }
+);
+
 Navbar.displayName = "Navbar";
 
 export { Navbar };
-
