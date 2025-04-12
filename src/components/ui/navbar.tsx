@@ -24,7 +24,7 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(({
   const pathname = usePathname();
 
   return (
-    
+    <>
       <nav
         className={cn(
           "fixed inset-x-0 bottom-0 bg-secondary border-t z-50",
@@ -53,11 +53,10 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(({
           ))}
         </div>
       </nav>
-    
+    </>
   );
 });
 Navbar.displayName = "Navbar";
 
 export { Navbar };
 
-    
