@@ -36,11 +36,17 @@ interface FeedingLogEntry {
   type: string;
   amount: number;
   unit: string;
+  notes: string;
 }
 
 const FeedingLogPage = () => {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
-  const [time, setTime] = useState('');
+  const [time, setTime] = useState(() => {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  });
   const [type, setType] = useState('');
   const [amount, setAmount] = useState('');
   const [unit, setUnit] = useState('ml');
@@ -73,6 +79,7 @@ const FeedingLogPage = () => {
       type,
       amount: Number(amount),
       unit,
+      notes
     };
     setFeedingLogs([...feedingLogs, newLog]);
     setTime('');
@@ -175,76 +182,78 @@ const FeedingLogPage = () => {
                     <SelectItem value="oz">oz</SelectItem>
                     <SelectItem value="grams">grams</SelectItem>
                   </SelectContent>
-                </Select>
-              </div>
+              </Select>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Input
-                type="text"
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add notes"
-              />
-            </div>
-            <Button type="submit">Log Feeding</Button>
-          </form>
-          <div className="py-4">
-            {hasData ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart
-                  data={chartData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3"/>
-                  <XAxis dataKey="time"/>
-                  <YAxis/>
-                  <Tooltip/>
-                  <Legend/>
-                  <Pie dataKey="amount" stroke="#8884d8" fill="#8884d8" activeDot={{r: 8}}/>
-                </ComposedChart>
-              </ResponsiveContainer>
-            ) : (
-              <p>No data to display.</p>
-            )}
           </div>
-          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {hasData ? (
-                  feedingLogs.map((log, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{log.date}</TableCell>
-                      <TableCell>{log.time}</TableCell>
-                      <TableCell>{log.type}</TableCell>
-                      <TableCell>{`${log.amount} ${log.unit}`}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center">No data available</TableCell>
+          <div className="grid gap-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Input
+              type="text"
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add notes"
+            />
+          </div>
+          <Button type="submit">Log Feeding</Button>
+        </form>
+        <div className="py-4">
+          {hasData ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart
+                data={chartData}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3"/>
+                <XAxis dataKey="time"/>
+                <YAxis/>
+                <Tooltip/>
+                <Legend/>
+                <Pie dataKey="amount" stroke="#8884d8" fill="#8884d8" activeDot={{r: 8}}/>
+              </ComposedChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>No data to display.</p>
+          )}
+        </div>
+        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Time</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Notes</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {hasData ? (
+                feedingLogs.map((log, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{log.date}</TableCell>
+                    <TableCell>{log.time}</TableCell>
+                    <TableCell>{log.type}</TableCell>
+                    <TableCell>{`${log.amount} ${log.unit}`}</TableCell>
+                    <TableCell>{log.notes}</TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center">No data available</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
   );
 };
 
