@@ -26,8 +26,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ComposedChart,
 } from 'recharts';
-import * as RechartsPrimitive from "recharts"
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 
 const data = [
@@ -117,7 +117,10 @@ const FeedingLogPage = () => {
                       mode="single"
                       selected={date}
                       onSelect={setDate}
-                      disabled={([year, month, day]) => year > 2024 || year < 2020}
+                      disabled={(date) => {
+                        const year = date?.getFullYear() || 0;
+                        return year > 2024 || year < 2020;
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -171,7 +174,7 @@ const FeedingLogPage = () => {
           </form>
           <div className="py-4">
             <ResponsiveContainer width="100%" height={300}>
-              <RechartsPrimitive.ComposedChart
+              <ComposedChart
                 data={chartData}
                 margin={{
                   top: 5,
@@ -185,8 +188,8 @@ const FeedingLogPage = () => {
                 <YAxis/>
                 <Tooltip/>
                 <Legend/>
-                <Pie type="monotone" dataKey="amount" stroke="#8884d8" activeDot={{r: 8}}/>
-              </RechartsPrimitive.ComposedChart>
+                <Pie dataKey="amount" stroke="#8884d8" fill="#8884d8" activeDot={{r: 8}}/>
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
           <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -218,3 +221,5 @@ const FeedingLogPage = () => {
 };
 
 export default FeedingLogPage;
+
+    
