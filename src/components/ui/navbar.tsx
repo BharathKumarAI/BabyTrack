@@ -21,28 +21,44 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
     const pathname = usePathname();
 
     return (
-      
+      <nav
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-50 bg-background border-t border-border shadow-md",
+          className
+        )}
+        ref={ref}
+        {...props}
+      >
         <div className="container max-w-full flex items-center justify-around p-3">
           {navigationItems.map((item) => {
             const Icon = Icons[item.icon as keyof typeof Icons];
             const isActive = pathname === item.href;
+
             return (
-              <React.Fragment key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex flex-col items-center justify-center px-3 py-2 rounded-md hover:bg-accent transition-colors",
-                    isActive ? "text-accent-foreground" : ""
-                  )}
-                >
-                  {Icon && <Icon className="h-5 w-5" />}
-                  <span className="text-xs">{item.label}</span>
-                </Link>
-              </React.Fragment>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center justify-center px-4 py-2 rounded-md transition-all duration-200",
+                  isActive
+                    ? "text-accent-foreground font-semibold"
+                    : "hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                {Icon && (
+                  <Icon
+                    className={cn("h-6 w-6 mb-1", {
+                      "text-accent": isActive,
+                      "text-muted-foreground": !isActive,
+                    })}
+                  />
+                )}
+                <span className="text-xs">{item.label}</span>
+              </Link>
             );
           })}
         </div>
-      
+      </nav>
     );
   }
 );

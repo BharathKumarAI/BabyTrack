@@ -27,6 +27,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import * as RechartsPrimitive from "recharts"
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 
 const data = [
@@ -170,7 +171,7 @@ const FeedingLogPage = () => {
           </form>
           <div className="py-4">
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart
+              <RechartsPrimitive.ComposedChart
                 data={chartData}
                 margin={{
                   top: 5,
@@ -185,7 +186,7 @@ const FeedingLogPage = () => {
                 <Tooltip/>
                 <Legend/>
                 <Pie type="monotone" dataKey="amount" stroke="#8884d8" activeDot={{r: 8}}/>
-              </PieChart>
+              </RechartsPrimitive.ComposedChart>
             </ResponsiveContainer>
           </div>
           <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
