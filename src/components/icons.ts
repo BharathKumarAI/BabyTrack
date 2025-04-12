@@ -1,4 +1,4 @@
-import {ArrowRight, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, File, HelpCircle, Home, Loader2, Mail, MessageSquare, Moon, Plus, PlusCircle, Search, Server, Settings, Share2, Shield, Sun, Trash, User, X, Workflow} from 'lucide-react';
+import {ArrowRight, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, File, HelpCircle, Home, Loader2, Mail, MessageSquare, Moon, Plus, PlusCircle, Search, Server, Settings, Share2, Shield, Sun, Trash, User, X, Workflow, ListChecks, Droplets, BedDouble, Activity, Tablet, Smile, Calendar, BookOpenCheck, Camera} from 'lucide-react';
 
 const Icons = {
   arrowRight: ArrowRight,
@@ -28,6 +28,21 @@ const Icons = {
   spinner: Loader2,
   trash: Trash,
   user: User,
+    // Navigation icons
+  dashboard: Home,
+  log: ListChecks,
+  calendar: Calendar,
+  journal: BookOpenCheck,
+  settingsIcon: Settings,
+  // Module icons
+  feeding: Droplets,
+  diaper: Activity,
+  sleep: BedDouble,
+  growth: Activity,
+  medication: Tablet,
+  mood: Smile,
+  vaccination: Shield,
+  photo: Camera
 };
 
 export {Icons};
