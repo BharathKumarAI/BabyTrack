@@ -27,22 +27,18 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
             const Icon = Icons[item.icon as keyof typeof Icons];
             const isActive = pathname === item.href;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex flex-col items-center justify-center px-3 py-2 rounded-md hover:bg-accent transition-colors",
-                  {
-                    "text-accent-foreground": isActive,
-                  }
-                )}
-              >
-                {Icon && <Icon className={cn("h-5 w-5", {
-                    "text-accent-foreground": isActive,
-                  })
-                } />}
-                <span className="text-xs">{item.label}</span>
-              </Link>
+              <React.Fragment key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex flex-col items-center justify-center px-3 py-2 rounded-md hover:bg-accent transition-colors",
+                    isActive ? "text-accent-foreground" : ""
+                  )}
+                >
+                  {Icon && <Icon className="h-5 w-5" />}
+                  <span className="text-xs">{item.label}</span>
+                </Link>
+              </React.Fragment>
             );
           })}
         </div>
