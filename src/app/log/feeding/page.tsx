@@ -18,8 +18,8 @@ import {cn} from '@/lib/utils';
 import {CalendarIcon} from 'lucide-react';
 import {format} from 'date-fns';
 import {
-  Chart,
-  Line,
+  PieChart,
+  Pie,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -170,7 +170,7 @@ const FeedingLogPage = () => {
           </form>
           <div className="py-4">
             <ResponsiveContainer width="100%" height={300}>
-              <Chart
+              <PieChart
                 data={chartData}
                 margin={{
                   top: 5,
@@ -184,8 +184,8 @@ const FeedingLogPage = () => {
                 <YAxis/>
                 <Tooltip/>
                 <Legend/>
-                <Line type="monotone" dataKey="amount" stroke="#8884d8" activeDot={{r: 8}}/>
-              </Chart>
+                <Pie type="monotone" dataKey="amount" stroke="#8884d8" activeDot={{r: 8}}/>
+              </PieChart>
             </ResponsiveContainer>
           </div>
           <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
