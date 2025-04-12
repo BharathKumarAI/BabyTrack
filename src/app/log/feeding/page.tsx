@@ -33,7 +33,7 @@ import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, A
 
 interface FeedingLogEntry {
   id: string;
-  date: string;
+  date: Date;
   time: string;
   type: string;
   amount: number;
@@ -93,7 +93,7 @@ const FeedingLogPage = () => {
     }
     const newLog: FeedingLogEntry = {
       id: Date.now().toString(), // Generate a unique ID
-      date: date ? format(date, 'yyyy-MM-dd') : '',
+      date: date,
       time,
       type,
       amount: Number(amount),
@@ -265,7 +265,7 @@ const FeedingLogPage = () => {
               {hasData ? (
                 feedingLogs.map((log) => (
                   <TableRow key={log.id}>
-                    <TableCell>{log.date}</TableCell>
+                    <TableCell>{format(log.date, 'yyyy-MM-dd')}</TableCell>
                     <TableCell>{log.time}</TableCell>
                     <TableCell>{log.type}</TableCell>
                     <TableCell>{log.amount}</TableCell>
@@ -287,7 +287,7 @@ const FeedingLogPage = () => {
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+                            <AlertDialogAction onClick={() => handleDelete()}>Continue</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
