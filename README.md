@@ -58,6 +58,9 @@ BabyTracker is built using modern web technologies:
   <source src="assets/demo/BabyTrackApp Demo.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
+
+> 📱 **Note:** The demo was recorded on a **tablet running Android 14**.
+
 ---
 
 ---
@@ -219,6 +222,8 @@ npm install @capacitor/android @capacitor/ios
 ```bash
 npm run build
 ```
+
+> ⚠️ **Note:** For iOS development, Xcode is required — which is only available on **macOS**.
 
 3. Add platforms:
 
