@@ -42,8 +42,10 @@ import {
   Heart,
   ThumbsUp,
   ThumbsDown,
+  Droplet,
   Calendar as CalendarIcon,
   AlertTriangle,
+  PlusIcon,
 } from "lucide-react";
 
 export const Icons = {
@@ -92,4 +94,6 @@ export const Icons = {
   uncomfortableMood: ThumbsDown,
   fussyMood: AlertTriangle,
   mood: Smile,
+  diaper: Droplet,
+  plus:PlusIcon,
 };

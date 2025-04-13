@@ -21,6 +21,15 @@ import {
 } from 'chart.js';
 import { Icons } from '@/components/icons';
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog";
 
 // Register ChartJS components
 ChartJS.register(
@@ -52,6 +61,7 @@ export default function ExpensesPage() {
   const [filterCategory, setFilterCategory] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
   const [chartView, setChartView] = useState('category'); // 'category' or 'timeline'
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (activeProfileData?.id) {
@@ -118,6 +128,7 @@ export default function ExpensesPage() {
     setAmount('');
     setDescription('');
     setExpenseDate(format(new Date(), 'yyyy-MM-dd'));
+    setDialogOpen(false);
   };
 
   const handleDeleteExpense = (id: string) => {
@@ -301,7 +312,7 @@ export default function ExpensesPage() {
   if (!activeProfileData) {
     return (
       <div className="flex flex-col items-center justify-start min-h-screen pt-10 px-4">
-        <Card className="w-full max-w-md shadow-lg border-2 border-primary">
+        <Card className="w-full max-w-md shadow-lg border">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center justify-center py-8">
               <Icons.alertCircle className="h-12 w-12 text-muted-foreground mb-4" />
@@ -321,29 +332,35 @@ export default function ExpensesPage() {
   return (
     <div className="flex flex-col items-center justify-start min-h-screen pt-10 px-4 pb-20">
       <div className="w-full max-w-4xl mb-6">
-        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 dark:from-blue-950 dark:to-purple-950 dark:border-blue-800">
+        <Card className="border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-blue-800 dark:text-blue-300">Expenses Tracker</h1>
-                <p className="text-blue-600 dark:text-blue-400">
+                <h1 className="text-2xl font-bold">Expenses Tracker</h1>
+                <p className="text-muted-foreground">
                   Tracking expenses for {activeProfileData.name}
                 </p>
               </div>
-              <Icons.expenses className="h-10 w-10 text-blue-500" />
+              <Icons.expenses className="h-10 w-10 text-green-500" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="shadow-md border-blue-200 dark:border-blue-800">
-          <CardHeader>
-            <CardTitle className="text-xl">Add Expense</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
+      <div className="w-full max-w-4xl mb-6 flex justify-end">
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-green-500 hover:bg-green-600">
+              <Icons.plus className="mr-2 h-4 w-4" />
+              Add Expense
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add Expense</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
                 <Label htmlFor="category">Category</Label>
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger id="category">
@@ -361,8 +378,7 @@ export default function ExpensesPage() {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-2">
+              <div className="grid gap-2">
                 <Label htmlFor="amount">Amount</Label>
                 <Input
                   id="amount"
@@ -372,8 +388,7 @@ export default function ExpensesPage() {
                   placeholder="Enter Amount"
                 />
               </div>
-
-              <div className="space-y-2">
+              <div className="grid gap-2">
                 <Label htmlFor="expenseDate">Date</Label>
                 <div className="flex items-center gap-2">
                   <Icons.calendar className="h-4 w-4 text-muted-foreground" />
@@ -386,8 +401,7 @@ export default function ExpensesPage() {
                   />
                 </div>
               </div>
-
-              <div className="space-y-2">
+              <div className="grid gap-2">
                 <Label htmlFor="description">Description (Optional)</Label>
                 <Input
                   id="description"
@@ -396,16 +410,26 @@ export default function ExpensesPage() {
                   placeholder="Enter Description"
                 />
               </div>
-
-              <Button onClick={handleAddExpense} className="w-full">
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button 
+                onClick={handleAddExpense} 
+                className="bg-green-500 hover:bg-green-600"
+                disabled={!category || !amount || !expenseDate}
+              >
                 Add Expense
               </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-        {expenses.length > 0 && (
-          <Card className="shadow-md border-purple-200 dark:border-purple-800">
+      {expenses.length > 0 && (
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <Card className="shadow-md border">
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle className="text-xl">Expense Summary</CardTitle>
@@ -458,80 +482,122 @@ export default function ExpensesPage() {
               </div>
               <div className="mt-4 text-center">
                 <p className="text-sm text-muted-foreground">Total Expenses</p>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">${calculateTotalExpenses()}</p>
+                <p className="text-2xl font-bold text-green-600">${calculateTotalExpenses()}</p>
               </div>
             </CardContent>
           </Card>
-        )}
-      </div>
 
-      <Card className="w-full max-w-4xl mt-6 shadow-md border-green-200 dark:border-green-800">
-        <CardHeader>
-          <CardTitle className="text-xl">Expenses List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="Food">Food</SelectItem>
-                  <SelectItem value="Toys">Toys</SelectItem>
-                  <SelectItem value="Clothing">Clothing</SelectItem>
-                  <SelectItem value="Healthcare">Healthcare</SelectItem>
-                  <SelectItem value="Diapers">Diapers</SelectItem>
-                  <SelectItem value="Childcare">Childcare</SelectItem>
-                  <SelectItem value="Education">Education</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Filtered Total</p>
-                <p className="text-lg font-bold">${calculateTotalExpenses()}</p>
-              </div>
-            </div>
-
-            {getFilteredExpenses().length > 0 ? (
-              <div className="space-y-2">
-                {getFilteredExpenses().map((expense) => (
-                  <div key={expense.id} className="flex justify-between items-center p-3 border rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <div>
-                      <p className="font-medium">{expense.category}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(expense.date), 'MMM d, yyyy')}
-                      </p>
-                      {expense.description && (
-                        <p className="text-sm">{expense.description}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold">${parseFloat(expense.amount).toFixed(2)}</p>
-                      <Button 
-                        variant="destructive" 
-                        size="sm"
-                        onClick={() => handleDeleteExpense(expense.id)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
+          <Card className="shadow-md border">
+            <CardHeader>
+              <CardTitle className="text-xl">Expenses List</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Select value={filterCategory} onValueChange={setFilterCategory}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filter by Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      <SelectItem value="Food">Food</SelectItem>
+                      <SelectItem value="Toys">Toys</SelectItem>
+                      <SelectItem value="Clothing">Clothing</SelectItem>
+                      <SelectItem value="Healthcare">Healthcare</SelectItem>
+                      <SelectItem value="Diapers">Diapers</SelectItem>
+                      <SelectItem value="Childcare">Childcare</SelectItem>
+                      <SelectItem value="Education">Education</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Filtered Total</p>
+                    <p className="text-lg font-bold">${calculateTotalExpenses()}</p>
                   </div>
-                ))}
+                </div>
+
+                <div className="max-h-[300px] overflow-y-auto">
+                  {getFilteredExpenses().length > 0 ? (
+                    <div className="space-y-2">
+                      {getFilteredExpenses().map((expense) => (
+                        <div key={expense.id} className="flex justify-between items-center p-3 border rounded-md hover:bg-accent/50">
+                          <div>
+                            <p className="font-medium">{expense.category}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {format(new Date(expense.date), 'MMM d, yyyy')}
+                            </p>
+                            {expense.description && (
+                              <p className="text-sm">{expense.description}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold">${parseFloat(expense.amount).toFixed(2)}</p>
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => handleDeleteExpense(expense.id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        {expenses.length > 0 
+                          ? "No expenses match your filter criteria." 
+                          : "No expenses found. Add some expenses to get started!"}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-            ) : (
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {!expenses.length && (
+        <Card className="w-full max-w-4xl shadow-md border">
+          <CardHeader>
+            <CardTitle className="text-xl">Expenses List</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <Select value={filterCategory} onValueChange={setFilterCategory}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filter by Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="Food">Food</SelectItem>
+                    <SelectItem value="Toys">Toys</SelectItem>
+                    <SelectItem value="Clothing">Clothing</SelectItem>
+                    <SelectItem value="Healthcare">Healthcare</SelectItem>
+                    <SelectItem value="Diapers">Diapers</SelectItem>
+                    <SelectItem value="Childcare">Childcare</SelectItem>
+                    <SelectItem value="Education">Education</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Filtered Total</p>
+                  <p className="text-lg font-bold">${calculateTotalExpenses()}</p>
+                </div>
+              </div>
+
               <div className="text-center py-8">
                 <p className="text-muted-foreground">
-                  {expenses.length > 0 
-                    ? "No expenses match your filter criteria." 
-                    : "No expenses found. Add some expenses to get started!"}
+                  No expenses found. Add some expenses to get started!
                 </p>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

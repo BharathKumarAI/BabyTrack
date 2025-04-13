@@ -10,6 +10,7 @@ interface BabyProfile {
   birthLength?: number; // New field
   additionalDetails?: string; // New field
   active: boolean;
+  photoUrl?: string;
 }
 
 interface BabyProfileContextType {

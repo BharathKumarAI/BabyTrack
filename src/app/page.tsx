@@ -594,7 +594,7 @@ export default function Dashboard() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={() => router.push('/log/expenses')}
+                    onClick={() => router.push('/expenses')}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     View All
@@ -610,7 +610,7 @@ export default function Dashboard() {
                       <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
                       <p className="text-muted-foreground">No expenses data available</p>
                       <Button 
-                        onClick={() => router.push('/log/expenses')} 
+                        onClick={() => router.push('/expenses')} 
                         className="mt-4"
                         variant="outline"
                       >
