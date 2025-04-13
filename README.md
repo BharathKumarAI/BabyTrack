@@ -59,7 +59,7 @@ npm install
 npm run dev
 ```
 
-This will start the development server, typically at [http://localhost:3000](http://localhost:3000)
+This will start the development server, typically at [http://localhost:9002](http://localhost:9002)
 
 ### Production Build
 
