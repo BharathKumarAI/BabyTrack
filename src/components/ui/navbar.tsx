@@ -12,8 +12,9 @@ const navigationItems = [
   { href: "/", icon: "dashboard", label: "Dashboard" },
   { href: "/health", icon: "health", label: "Health" },
   { href: "/log", icon: "log", label: "Log" },
-  { href: "/calendar", icon: "calendar", label: "Calendar" },
   { href: "/expenses", icon: "expenses", label: "Expenses" },
+  { href: "/calendar", icon: "calendar", label: "Calendar" },
+  { href: "/journal", icon: "journal", label: "Journal" },
   { href: "/settings", icon: "settings", label: "Settings" },
 ];
 
