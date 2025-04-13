@@ -1,35 +1,37 @@
-import type {Metadata} from 'next';
-import {Geist, Geist_Mono} from 'next/font/google';
+// app/layout.tsx
+'use client';
+
 import './globals.css';
-import {Navbar} from "@/components/ui/navbar";
+import { BabyProfileProvider } from './BabyProfileContext';
+import { Navbar } from '@/components/ui/navbar'; // Import the Navbar component
+import { useState, createContext, useContext } from 'react';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+export const DarkModeContext = createContext({
+  darkMode: false,
+  setDarkMode: (value: boolean) => {},
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
-
-export const metadata: Metadata = {
-  title: 'TinyTracker',
-  description: 'TinyTracker: Your all-in-one baby tracking app.',
-};
+export const useDarkMode = () => useContext(DarkModeContext);
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const [darkMode, setDarkMode] = useState(false);
+
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
-        <Navbar />
+    <html lang="en" className={darkMode ? 'dark' : ''}>
+      <body className="min-h-screen bg-background">
+        <DarkModeContext.Provider value={{ darkMode, setDarkMode }}>
+          <BabyProfileProvider>
+            <div className="pb-20"> {/* Add padding to bottom to account for navbar */}
+              {children}
+            </div>
+            <Navbar /> {/* Add the navbar component */}
+          </BabyProfileProvider>
+        </DarkModeContext.Provider>
       </body>
     </html>
   );
 }
-

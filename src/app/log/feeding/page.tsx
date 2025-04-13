@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -8,28 +8,50 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
-import {Label} from '@/components/ui/label';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {Calendar} from '@/components/ui/calendar';
-import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover';
-import {cn} from '@/lib/utils';
-import {CalendarIcon, Trash2} from 'lucide-react';
-import {format} from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { CalendarIcon, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
 import {
   PieChart,
   Pie,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Cell,
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ComposedChart,
 } from 'recharts';
-import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger} from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useBabyProfile } from '@/app/BabyProfileContext';
 
 interface FeedingLogEntry {
   id: string;
@@ -39,10 +61,19 @@ interface FeedingLogEntry {
   amount: number;
   unit: string;
   notes: string;
+  babyId: string; // Add babyId to associate entries with specific babies
 }
 
+const typeColors: { [key: string]: string } = {
+  Breastfeeding: '#8884d8',
+  Formula: '#82ca9d',
+  Solids: '#ffc658',
+  Pumping: '#ff8042',
+};
+
 const FeedingLogPage = () => {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  const { activeProfileData } = useBabyProfile();
+  const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState(() => {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, '0');
@@ -56,17 +87,21 @@ const FeedingLogPage = () => {
   const [feedingLogs, setFeedingLogs] = useState<FeedingLogEntry[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
+  const [editingLogId, setEditingLogId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load data from localStorage on component mount
     const storedLogs = localStorage.getItem('feedingLogs');
     if (storedLogs) {
-      setFeedingLogs(JSON.parse(storedLogs));
+      const parsedLogs = JSON.parse(storedLogs);
+      const logsWithDates = parsedLogs.map((log: any) => ({
+        ...log,
+        date: new Date(log.date),
+      }));
+      setFeedingLogs(logsWithDates);
     }
   }, []);
 
   useEffect(() => {
-    // Save data to localStorage whenever feedingLogs changes
     localStorage.setItem('feedingLogs', JSON.stringify(feedingLogs));
   }, [feedingLogs]);
 
@@ -84,32 +119,64 @@ const FeedingLogPage = () => {
     setNotes('');
   };
 
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date || !time || !type || !amount || !unit) {
+    if (!date || !time || !type || !amount || !unit || !activeProfileData) {
       alert('Please fill in all fields.');
       return;
     }
     const newLog: FeedingLogEntry = {
-      id: Date.now().toString(), // Generate a unique ID
+      id: editingLogId ? editingLogId : Date.now().toString(),
       date: date,
       time,
       type,
       amount: Number(amount),
       unit,
-      notes
+      notes,
+      babyId: activeProfileData.id
     };
-    setFeedingLogs([...feedingLogs, newLog]);
-    clearForm(); // Clear the form after submitting
+
+    if (editingLogId) {
+      // Edit existing log
+      const updatedLogs = feedingLogs.map((log) =>
+        log.id === editingLogId ? newLog : log
+      );
+      setFeedingLogs(updatedLogs);
+    } else {
+      // Add new log
+      setFeedingLogs([...feedingLogs, newLog]);
+    }
+
+    clearForm();
+    setEditingLogId(null);
   };
 
-  const chartData = feedingLogs.map(log => ({
-    time: log.time,
-    amount: log.amount,
+  const handleEdit = (log: FeedingLogEntry) => {
+    setEditingLogId(log.id);
+    setDate(log.date);
+    setTime(log.time);
+    setType(log.type);
+    setAmount(log.amount.toString());
+    setUnit(log.unit);
+    setNotes(log.notes);
+  };
+
+  // Filter logs for the active baby
+  const filteredLogs = activeProfileData 
+    ? feedingLogs.filter(log => log.babyId === activeProfileData.id)
+    : [];
+
+  const chartData = Object.entries(
+    filteredLogs.reduce((acc, log) => {
+      acc[log.type] = (acc[log.type] || 0) + log.amount;
+      return acc;
+    }, {} as { [key: string]: number })
+  ).map(([type, amount]) => ({
+    name: type,
+    value: amount,
   }));
 
-  const hasData = feedingLogs.length > 0;
+  const hasData = filteredLogs.length > 0;
 
   const handleDeleteConfirmation = (logId: string) => {
     setSelectedLogId(logId);
@@ -118,18 +185,42 @@ const FeedingLogPage = () => {
 
   const handleDelete = () => {
     if (selectedLogId) {
-      const updatedLogs = feedingLogs.filter(log => log.id !== selectedLogId);
+      const updatedLogs = feedingLogs.filter((log) => log.id !== selectedLogId);
       setFeedingLogs(updatedLogs);
       setIsDeleteDialogOpen(false);
       setSelectedLogId(null);
     }
   };
 
+  // If no active profile, show a message
+  if (!activeProfileData) {
+    return (
+      <div className="flex flex-col items-center justify-start min-h-screen pt-20 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl">Feeding Log</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center py-4">
+              Please set up a baby profile in the settings page first.
+            </p>
+            <Button 
+              className="w-full mt-4"
+              onClick={() => window.location.href = '/settings'}
+            >
+              Go to Settings
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-start min-h-screen pt-20">
       <Card className="w-full max-w-3xl shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl">Feeding Log</CardTitle>
+          <CardTitle className="text-2xl">Feeding Log for {activeProfileData.name}</CardTitle>
           <CardDescription>
             Log feeding times, amounts, and types here.
           </CardDescription>
@@ -148,7 +239,7 @@ const FeedingLogPage = () => {
                         !date && 'text-muted-foreground'
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4"/>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
                       {date ? format(date, 'yyyy-MM-dd') : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
@@ -173,11 +264,12 @@ const FeedingLogPage = () => {
                 />
               </div>
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="type">Type</Label>
               <Select onValueChange={setType} value={type}>
                 <SelectTrigger className="w-[240px]">
-                  <SelectValue placeholder="Select feeding type"/>
+                  <SelectValue placeholder="Select feeding type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Breastfeeding">Breastfeeding</SelectItem>
@@ -187,6 +279,7 @@ const FeedingLogPage = () => {
                 </SelectContent>
               </Select>
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="amount">Amount</Label>
@@ -202,109 +295,139 @@ const FeedingLogPage = () => {
                 <Label htmlFor="unit">Unit</Label>
                 <Select onValueChange={setUnit} value={unit}>
                   <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Select unit"/>
+                    <SelectValue placeholder="Select unit" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ml">ml</SelectItem>
                     <SelectItem value="oz">oz</SelectItem>
                     <SelectItem value="grams">grams</SelectItem>
                   </SelectContent>
-              </Select>
+                </Select>
+              </div>
             </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Input
+                type="text"
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add notes"
+              />
+            </div>
+
+            <Button type="submit">
+              {editingLogId ? 'Update Log' : 'Log Feeding'}
+            </Button>
+          </form>
+
+          {/* Pie Chart */}
+          <div className="py-6">
+            {hasData ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    dataKey="value"
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={typeColors[entry.name] || '#ccc'}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-muted-foreground">No data to display.</p>
+            )}
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="notes">Notes</Label>
-            <Input
-              type="text"
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add notes"
-            />
-          </div>
-          <Button type="submit">Log Feeding</Button>
-        </form>
-        <div className="py-4">
-          {hasData ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart
-                data={chartData}
-                margin={{
-                  top: 5,
-                  right: 30,
-                  left: 20,
-                  bottom: 5,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3"/>
-                <XAxis dataKey="time"/>
-                <YAxis/>
-                <Tooltip/>
-                <Legend/>
-                <Pie dataKey="amount" stroke="#8884d8" fill="#8884d8" activeDot={{r: 8}}/>
-              </ComposedChart>
-            </ResponsiveContainer>
-          ) : (
-            <p>No data to display.</p>
-          )}
-        </div>
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead>Notes</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {hasData ? (
-                feedingLogs.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell>{format(log.date, 'yyyy-MM-dd')}</TableCell>
-                    <TableCell>{log.time}</TableCell>
-                    <TableCell>{log.type}</TableCell>
-                    <TableCell>{log.amount}</TableCell>
-                    <TableCell>{log.unit}</TableCell>
-                    <TableCell>{log.notes}</TableCell>
-                    <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeleteConfirmation(log.id)}>
-                            <Trash2 className="h-4 w-4"/>
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the feeding log.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete()}>Continue</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+
+          {/* Table */}
+          <div className="relative overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Unit</TableHead>
+                  <TableHead>Notes</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {hasData ? (
+                  filteredLogs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell>{format(new Date(log.date), 'yyyy-MM-dd')}</TableCell>
+                      <TableCell>{log.time}</TableCell>
+                      <TableCell>{log.type}</TableCell>
+                      <TableCell>{log.amount}</TableCell>
+                      <TableCell>{log.unit}</TableCell>
+                      <TableCell>{log.notes}</TableCell>
+                      <TableCell>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleEdit(log)}
+                        >
+                          Edit
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteConfirmation(log.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete the feeding log.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel
+                                onClick={() => setIsDeleteDialogOpen(false)}
+                              >
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction onClick={handleDelete}>
+                                Continue
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center">
+                      No feeding logs yet.
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center">No data available</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

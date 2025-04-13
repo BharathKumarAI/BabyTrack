@@ -13,7 +13,7 @@ const navigationItems = [
   { href: "/log", icon: "log", label: "Log" },
   { href: "/calendar", icon: "calendar", label: "Calendar" },
   { href: "/journal", icon: "journal", label: "Journal" },
-  { href: "/settings", icon: "settingsIcon", label: "Settings" },
+  { href: "/settings", icon: "settings", label: "Settings" },
 ];
 
 const Navbar = React.forwardRef<HTMLElement, NavbarProps>(

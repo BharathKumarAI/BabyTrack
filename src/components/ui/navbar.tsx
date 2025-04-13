@@ -12,8 +12,9 @@ const navigationItems = [
   { href: "/", icon: "dashboard", label: "Dashboard" },
   { href: "/log", icon: "log", label: "Log" },
   { href: "/calendar", icon: "calendar", label: "Calendar" },
-  { href: "/journal", icon: "journal", label: "Journal" },
-  { href: "/settingsIcon", icon: "settingsIcon", label: "Settings" },
+  { href: "/expenses", icon: "expenses", label: "Expenses" },
+  { href: "/log/health", icon: "health", label: "Health" },
+  { href: "/settings", icon: "settings", label: "Settings" },
 ];
 
 const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
@@ -31,8 +32,11 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       >
         <div className="container max-w-full flex items-center justify-around p-3">
           {navigationItems.map((item) => {
-            const Icon = Icons[item.icon as keyof typeof Icons];
-            const isActive = pathname === item.href;
+            const Icon = Icons[item.icon];
+            const isActive = 
+              item.href === "/" 
+                ? pathname === "/" 
+                : pathname.startsWith(item.href);
 
             return (
               <Link
@@ -48,7 +52,7 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 {Icon && (
                   <Icon
                     className={cn("h-6 w-6 mb-1", {
-                      "text-accent": isActive,
+                      "text-primary": isActive,
                       "text-muted-foreground": !isActive,
                     })}
                   />
