@@ -10,10 +10,10 @@ interface NavbarProps extends React.HTMLAttributes<HTMLElement> {}
 
 const navigationItems = [
   { href: "/", icon: "dashboard", label: "Dashboard" },
+  { href: "/health", icon: "health", label: "Health" },
   { href: "/log", icon: "log", label: "Log" },
   { href: "/calendar", icon: "calendar", label: "Calendar" },
   { href: "/expenses", icon: "expenses", label: "Expenses" },
-  { href: "/log/health", icon: "health", label: "Health" },
   { href: "/settings", icon: "settings", label: "Settings" },
 ];
 

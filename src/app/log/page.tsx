@@ -42,12 +42,12 @@ const logModules = [
   { href: "/log/mood", icon: "mood", label: "Mood", color: "bg-indigo-50 border-indigo-200 hover:bg-indigo-100", iconColor: "text-indigo-600" },
   { href: "/log/vaccination", icon: "vaccination", label: "Vaccination", color: "bg-teal-50 border-teal-200 hover:bg-teal-100", iconColor: "text-teal-600" },
   { href: "/log/photo", icon: "photo", label: "Photo", color: "bg-orange-50 border-orange-200 hover:bg-orange-100", iconColor: "text-orange-600" },
-  {
-    name: "Health",
-    description: "Track health conditions, symptoms, and treatments",
-    icon: "medication", // Make sure this icon exists in your icons.ts
-    href: "/log/health",
-  },
+  // {
+  //   name: "Health",
+  //   description: "Track health conditions, symptoms, and treatments",
+  //   icon: "medication", // Make sure this icon exists in your icons.ts
+  //   href: "/log/health",
+  // },
 ];
 
 export default function LogPage() {
