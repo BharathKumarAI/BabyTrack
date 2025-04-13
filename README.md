@@ -2,7 +2,7 @@
   <img src="public/images/logo.jpeg" alt="BabyTracker Logo" width="200" />
 </p>
 
-# BabyTracker
+# BabyTracker 👶
 
 > BabyTracker – Making parenting a little easier, one log at a time.
 
