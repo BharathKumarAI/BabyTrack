@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="images/logo.jpeg" alt="BabyTracker Logo" width="200" />
+  <img src="public/images/logo.jpeg" alt="BabyTracker Logo" width="200" />
 </p>
 
 # BabyTracker
